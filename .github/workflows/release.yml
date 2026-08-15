@@ -1,0 +1,70 @@
+name: 三端打包发布
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-22.04
+    outputs:
+      release_id: ${{ steps.release.outputs.release_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: 创建 Release
+        id: release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "一人公司智能体 ${{ github.ref_name }}"
+          releaseBody: |
+            ## 一人公司智能体(OPC Agent)社区版 ${{ github.ref_name }}
+
+            BOSS 用文字或语音下达指令,自动分派给最合适的 AI 员工,员工并行协作、流式汇报结果。
+
+            ### 三端安装包
+            - **macOS**(Intel + Apple Silicon):`_x64.dmg` / `_aarch64.dmg` / `.app`
+            - **Windows** 10/11:`_x64.msi` / `_x64-setup.exe`
+            - **Linux**(Ubuntu 22.04+):`.deb` / `.AppImage`
+
+            ### 快速开始
+            1. 下载对应系统的安装包
+            2. 打开应用 → 设置 → 填入 DeepSeek API Key(默认模型 deepseek-v4-flash)
+            3. 在「员工管理」添加你的 AI 员工,或直接对老板说:帮我写一段产品发布文案
+
+            > 本版本为社区版(MIT 开源),全部核心功能可用。语音输入:macOS/Windows 用系统语音识别;Linux 需在应用内下载中文模型。
+          draft: true
+          prerelease: false
+
+  build-tauri:
+    needs: create-release
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest, ubuntu-22.04, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rust 工具链
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Linux 系统依赖
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libasound2-dev
+
+      - name: 构建并上传产物
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          releaseId: ${{ needs.create-release.outputs.release_id }}

@@ -1,4 +1,4 @@
-//! OPC Agent 入口:多 AI 员工协调的智能工作台(社区版,开源)。
+//! 一人公司智能体入口:多 AI 员工协调的智能工作台(社区版,开源)。
 
 mod commands;
 mod db;
@@ -48,5 +48,5 @@ pub fn run() {
             stt::stt_download_model,
         ])
         .run(tauri::generate_context!())
-        .expect("OPC Agent 启动失败");
+        .expect("一人公司智能体启动失败");
 }

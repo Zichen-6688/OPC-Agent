@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "OPC Agent",
+  "productName": "一人公司智能体",
   "version": "0.1.0",
   "identifier": "com.opc.agent",
   "build": {
@@ -10,7 +10,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "OPC Agent · 多 AI 员工协同",
+        "title": "一人公司智能体 · 多 AI 员工协同",
         "width": 1280,
         "height": 820,
         "minWidth": 1024,

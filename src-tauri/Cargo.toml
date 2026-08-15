@@ -1,7 +1,7 @@
 [package]
 name = "opc-agent"
 version = "0.1.0"
-description = "OPC Agent - 多 AI 员工协调的智能工作台 (Rust + Tauri + SQLite)"
+description = "一人公司智能体 - 多 AI 员工协调的智能工作台 (Rust + Tauri + SQLite)"
 edition = "2021"
 
 [lib]

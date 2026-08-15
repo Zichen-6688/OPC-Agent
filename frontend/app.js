@@ -1,4 +1,4 @@
-/* ===== OPC Agent 前端逻辑 ===== */
+/* ===== 一人公司智能体 前端逻辑 ===== */
 (function () {
   "use strict";
 
@@ -615,7 +615,7 @@
     $("btnSettings").addEventListener("click", openSettings);
     $("btnAddEmployee").addEventListener("click", () => openEmpModal(null));
     $("btnTestVoice").addEventListener("click", () => {
-      call("speak", { text: "你好,我是 OPC Agent,随时为你服务。" }, true).catch((e) => toast(e));
+      call("speak", { text: "你好,我是一人公司智能体,随时为你服务。" }, true).catch((e) => toast(e));
     });
     $("btnDownloadModel").addEventListener("click", async () => {
       try {

@@ -57,3 +57,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
+          # Windows 中文产品名与 WiX/MSI 不兼容(light.exe 失败),只打 NSIS 安装器
+          args: ${{ matrix.platform == 'windows-latest' && '--bundles nsis' || '' }}

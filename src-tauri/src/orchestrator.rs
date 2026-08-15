@@ -1,4 +1,4 @@
-//! 智能调度中枢:根据 BOSS 指令与员工名册,决定把任务派给哪些 AI 员工。
+//! 智能调度中枢:根据老板指令与员工名册,决定把任务派给哪些 AI 员工。
 //!
 //! 策略:
 //! 1. 主路径 —— 调度 LLM 输出 JSON(容忍解析,DeepSeek 等提供商不支持 json_schema,
@@ -93,13 +93,13 @@ pub async fn decide(
         };
     }
 
-    let system = "你是「一人公司智能体」的智能调度中枢。BOSS 会给出一条指令,你根据 AI 员工的岗位与擅长领域,把任务分派给最合适的 1~3 名员工。\
+    let system = "你是「一人公司智能体」的智能调度中枢。老板会给出一条指令,你根据 AI 员工的岗位与擅长领域,把任务分派给最合适的 1~3 名员工。\
         \n你必须只输出一个 JSON 对象,不要输出任何其他文字,格式如下:\
         \n{\"assigned\": [员工id列表], \"reason\": \"为什么这样分派(一句话中文说明)\"}\
         \n如果指令过于简单(如问候、闲聊),只选 1 名最通用的员工;如果指令复杂,可多选。";
     let user = json!({
         "role": "user",
-        "content": format!("【AI 员工名册】\n{}\n\n【BOSS 指令】\n{}", build_roster(&enabled), boss_message)
+        "content": format!("【AI 员工名册】\n{}\n\n【老板指令】\n{}", build_roster(&enabled), boss_message)
     });
 
     match chat_once(cfg, system, &[user]).await {

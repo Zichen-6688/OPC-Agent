@@ -119,7 +119,7 @@ pub fn get_edition() -> serde_json::Value {
 
 // ---------------- 派单流水线 ----------------
 
-/// BOSS 发送消息。立即落库并返回会话 id,后台异步执行:
+/// 老板发送消息。立即落库并返回会话 id,后台异步执行:
 /// 调度决策 → 分派 → 员工并行回复(流式)→ 完成事件。
 #[tauri::command]
 pub async fn send_boss_message(

@@ -239,7 +239,7 @@
   function renderHistory(msgs, logs) {
     const box = $("messages");
     box.innerHTML = "";
-    // 把派单日志插到对应 BOSS 消息之后
+    // 把派单日志插到对应老板消息之后
     const entries = msgs.map((m) => ({ type: "msg", data: m }));
     for (const log of logs) {
       let inserted = false;
@@ -276,7 +276,7 @@
     row.className = "msg-row boss";
     row.innerHTML = `
       <div class="msg-body">
-        <div class="msg-meta"><span class="msg-name">BOSS</span>${time ? `<span>${fmtTime(time)}</span>` : ""}</div>
+        <div class="msg-meta"><span class="msg-name">老板</span>${time ? `<span>${fmtTime(time)}</span>` : ""}</div>
         <div class="bubble boss-bubble">${renderMd(text)}</div>
       </div>`;
     $("messages").appendChild(row);

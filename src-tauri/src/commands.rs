@@ -102,8 +102,12 @@ pub fn save_settings(state: State<'_, AppState>, settings: AppSettings) -> Resul
 // ---------------- 语音 ----------------
 
 #[tauri::command]
-pub fn speak(text: String, voice: Option<String>) -> Result<(), String> {
-    voice::speak(&text, voice.as_deref())
+pub async fn speak(text: String, voice: Option<String>) -> Result<(), String> {
+    // 语音播报是长时同步子进程(say/PowerShell/spd-say),不能占用主线程,
+    // 否则朗读期间 UI 冻结(鼠标转圈)。spawn_blocking 放到独立线程池执行。
+    tauri::async_runtime::spawn_blocking(move || voice::speak(&text, voice.as_deref()))
+        .await
+        .map_err(|e| format!("语音线程异常: {e}"))?
 }
 
 // ---------------- 版本 / 版本信息 ----------------

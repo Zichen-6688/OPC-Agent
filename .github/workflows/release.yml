@@ -54,6 +54,8 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+
       - name: 下载全部平台产物
         uses: actions/download-artifact@v4
         with:
@@ -76,6 +78,6 @@ jobs:
               --title "一人公司智能体 $TAG" \
               --notes "三端打包发布(CI 自动构建)" --draft
           fi
-          gh release upload "$TAG" dist/* --clobber
+          gh release upload "$TAG" $(find dist -type f) --clobber
           echo "=== 上传完成 ==="
           gh release view "$TAG" --json name,tagName,isDraft -q '"\(.name) | tag: \(.tagName) | draft: \(.isDraft)"'

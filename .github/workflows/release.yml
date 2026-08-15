@@ -14,41 +14,21 @@ jobs:
       release_id: ${{ steps.release.outputs.release_id }}
     steps:
       - uses: actions/checkout@v4
-      - name: 诊断 GitHub token 权限
+      - name: 创建 Release(显式 gh)
+        id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "=== repo permissions ==="
+          set -e
+          echo "=== 仓库权限 ==="
           gh api /repos/${{ github.repository }} --jq '.permissions | to_entries | map(select(.value==true)) | map(.key) | join(",")'
-          echo "=== 尝试创建 release ==="
-          gh release create v0.1.0-diag --title "诊断测试" --notes "诊断" --draft 2>&1 || echo "CREATE_FAILED_EXIT=$?"
-          gh release delete v0.1.0-diag --yes 2>&1 || true
-      - name: 创建 Release
-        id: release
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: ${{ github.ref_name }}
-          releaseName: "一人公司智能体 ${{ github.ref_name }}"
-          releaseBody: |
-            ## 一人公司智能体(OPC Agent)社区版 ${{ github.ref_name }}
-
-            BOSS 用文字或语音下达指令,自动分派给最合适的 AI 员工,员工并行协作、流式汇报结果。
-
-            ### 三端安装包
-            - **macOS**(Intel + Apple Silicon):`_x64.dmg` / `_aarch64.dmg` / `.app`
-            - **Windows** 10/11:`_x64.msi` / `_x64-setup.exe`
-            - **Linux**(Ubuntu 22.04+):`.deb` / `.AppImage`
-
-            ### 快速开始
-            1. 下载对应系统的安装包
-            2. 打开应用 → 设置 → 填入 DeepSeek API Key(默认模型 deepseek-v4-flash)
-            3. 在「员工管理」添加你的 AI 员工,或直接对老板说:帮我写一段产品发布文案
-
-            > 本版本为社区版(MIT 开源),全部核心功能可用。语音输入:macOS/Windows 用系统语音识别;Linux 需在应用内下载中文模型。
-          draft: true
-          prerelease: false
+          echo "=== 创建 release ==="
+          gh release create "${{ github.ref_name }}" \
+            --title "一人公司智能体 ${{ github.ref_name }}" \
+            --notes "三端打包发布(CI 自动构建)" --draft
+          RID=$(gh release view "${{ github.ref_name }}" --json id --jq .id)
+          echo "release_id=$RID" >> "$GITHUB_OUTPUT"
+          echo "创建成功 release_id=$RID"
 
   build-tauri:
     needs: create-release

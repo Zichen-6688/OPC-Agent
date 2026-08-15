@@ -11,7 +11,7 @@ pub const DB_FILE: &str = "opc-agent.db";
 // ---------------- 模型 ----------------
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "snake_case")]
 pub struct Employee {
     pub id: i64,
     pub name: String,
@@ -415,4 +415,25 @@ pub fn save_settings(conn: &Connection, s: &AppSettings) -> rusqlite::Result<()>
         )?;
     }
     Ok(())
+}
+
+// ---------------- 测试 ----------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// 前端 payload 使用 snake_case,必须能反序列化为 Employee(回归保护)。
+    #[test]
+    fn employee_snake_case_roundtrip() {
+        let json = r##"{"id":0,"name":"小码","role":"程序员","emoji":"👨‍💻","color":"#2563eb","capabilities":["写代码"],"system_prompt":"你是一名资深程序员","base_url":"https://api.deepseek.com","api_key":"sk-1","model":"deepseek-v4-flash","temperature":0.3,"enabled":true}"##;
+        let e: Employee = serde_json::from_str(json).expect("snake_case payload 应可解析");
+        assert_eq!(e.system_prompt, "你是一名资深程序员");
+        assert_eq!(e.base_url, "https://api.deepseek.com");
+        assert_eq!(e.model, "deepseek-v4-flash");
+        // 序列化回 snake_case,前端读取 emp.system_prompt 等
+        let back: serde_json::Value = serde_json::to_value(&e).unwrap();
+        assert!(back.get("system_prompt").is_some(), "序列化应为 snake_case");
+        assert!(back.get("base_url").is_some());
+    }
 }

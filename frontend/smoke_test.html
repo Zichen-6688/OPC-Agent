@@ -108,7 +108,7 @@
           </label>
           <label class="field">
             <span class="field-label">模型名称 <i>*</i></span>
-            <input id="f_model" type="text" placeholder="deepseek-chat">
+            <input id="f_model" type="text" placeholder="deepseek-v4-flash">
           </label>
           <label class="field">
             <span class="field-label">API Key</span>
@@ -210,7 +210,7 @@
     const MOCK_EMP = {
       id: 1, name: "小码", role: "程序员", emoji: "👨‍💻", color: "#2563eb",
       enabled: true, baseUrl: "https://api.deepseek.com", apiKey: "sk-test",
-      model: "deepseek-chat", temperature: 0.3, prompt: "你是一名资深程序员",
+      model: "deepseek-v4-flash", temperature: 0.3, prompt: "你是一名资深程序员",
       createdAt: "2026-08-15 10:00:00"
     };
     const MOCK_EMP2 = {...MOCK_EMP, id: 2, name: "小艺", role: "设计师", emoji: "🎨", color: "#7c3aed", prompt: "你是一名设计师"};
@@ -220,7 +220,7 @@
           console.log("[stub] invoke", name, JSON.stringify(args || {}));
           switch (name) {
             case "get_edition": return { edition: "community", version: "0.1.0" };
-            case "get_settings": return { orcBaseUrl: "https://api.deepseek.com", orcApiKey: "", orcModel: "deepseek-chat", orcTemperature: 0.3 };
+            case "get_settings": return { orcBaseUrl: "https://api.deepseek.com", orcApiKey: "", orcModel: "deepseek-v4-flash", orcTemperature: 0.3 };
             case "list_employees": return [MOCK_EMP, MOCK_EMP2];
             case "list_conversations": return [];
             case "get_messages": return [];

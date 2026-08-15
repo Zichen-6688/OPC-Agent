@@ -139,7 +139,7 @@
     $("f_system_prompt").value = emp ? emp.system_prompt : "";
     $("f_base_url").value = emp ? emp.base_url : (state.settings && state.settings.orcBaseUrl) || "https://api.deepseek.com";
     $("f_api_key").value = emp ? emp.api_key : "";
-    $("f_model").value = emp ? emp.model : (state.settings && state.settings.orcModel) || "deepseek-chat";
+    $("f_model").value = emp ? emp.model : (state.settings && state.settings.orcModel) || "deepseek-v4-flash";
     const temp = emp ? emp.temperature : 0.7;
     $("f_temperature").value = temp;
     $("f_temp_val").textContent = temp.toFixed(1);
@@ -554,7 +554,7 @@
     const s = state.settings || {};
     $("s_base_url").value = s.orcBaseUrl || "https://api.deepseek.com";
     $("s_api_key").value = s.orcApiKey || "";
-    $("s_model").value = s.orcModel || "deepseek-chat";
+    $("s_model").value = s.orcModel || "deepseek-v4-flash";
     const t = s.orcTemperature != null ? s.orcTemperature : 0.3;
     $("s_temperature").value = t;
     $("s_temp_val").textContent = t.toFixed(1);

@@ -75,7 +75,7 @@ impl Default for AppSettings {
         Self {
             orc_base_url: "https://api.deepseek.com".into(),
             orc_api_key: String::new(),
-            orc_model: "deepseek-chat".into(),
+            orc_model: "deepseek-v4-flash".into(),
             orc_temperature: 0.3,
         }
     }

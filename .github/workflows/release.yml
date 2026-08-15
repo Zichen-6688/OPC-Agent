@@ -8,32 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  create-release:
-    runs-on: ubuntu-22.04
-    outputs:
-      release_id: ${{ steps.release.outputs.release_id }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: 创建 Release(显式 gh)
-        id: release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -e
-          echo "=== 仓库权限 ==="
-          gh api /repos/${{ github.repository }} --jq '.permissions | to_entries | map(select(.value==true)) | map(.key) | join(",")'
-          echo "=== 创建 release ==="
-          gh release create "${{ github.ref_name }}" \
-            --title "一人公司智能体 ${{ github.ref_name }}" \
-            --notes "三端打包发布(CI 自动构建)" --draft
-          RID=$(gh release view "${{ github.ref_name }}" --json id --jq .id)
-          echo "release_id=$RID" >> "$GITHUB_OUTPUT"
-          echo "创建成功 release_id=$RID"
-
   build-tauri:
-    needs: create-release
-    permissions:
-      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -51,11 +26,55 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libasound2-dev
 
-      - name: 构建并上传产物
+      - name: 构建(tauri-action 只构建不发布)
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          releaseId: ${{ needs.create-release.outputs.release_id }}
           # Windows 中文产品名与 WiX/MSI 不兼容(light.exe 失败),只打 NSIS 安装器
           args: ${{ matrix.platform == 'windows-latest' && '--bundles nsis' || '' }}
+
+      - name: 收集构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-${{ matrix.platform }}
+          if-no-files-found: error
+          path: |
+            src-tauri/target/release/bundle/**/*.app.tar.gz
+            src-tauri/target/release/bundle/**/*.dmg
+            src-tauri/target/release/bundle/**/*.exe
+            src-tauri/target/release/bundle/**/*.deb
+            src-tauri/target/release/bundle/**/*.AppImage
+            src-tauri/target/release/bundle/**/*.msi
+            src-tauri/target/release/bundle/**/*.sig
+
+  publish:
+    needs: build-tauri
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: 下载全部平台产物
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: 创建 Release 并上传资产
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          TAG="${{ github.ref_name }}"
+          echo "=== 产物清单 ==="
+          ls -la dist/
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release 已存在,跳过创建"
+          else
+            gh release create "$TAG" \
+              --title "一人公司智能体 $TAG" \
+              --notes "三端打包发布(CI 自动构建)" --draft
+          fi
+          gh release upload "$TAG" dist/* --clobber
+          echo "=== 上传完成 ==="
+          gh release view "$TAG" --json name,tagName,isDraft -q '"\(.name) | tag: \(.tagName) | draft: \(.isDraft)"'

@@ -63,6 +63,7 @@ jobs:
       - name: 创建 Release 并上传资产
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
           set -e
           TAG="${{ github.ref_name }}"

@@ -1,0 +1,31 @@
+[package]
+name = "opc-agent"
+version = "0.1.0"
+description = "OPC Agent - 多 AI 员工协调的智能工作台 (Rust + Tauri + SQLite)"
+edition = "2021"
+
+[lib]
+name = "opc_agent_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+# 社区版:默认构建,全部核心功能开源,零系统依赖。
+# vosk-stt:Linux 离线语音识别(可选)。macOS/Windows 用系统原生语音识别,
+#          无需此特性;Linux 启用它需先安装 Vosk 运行时(见 README「Linux 语音输入」)。
+#          安装运行时后:cd src-tauri && cargo tauri build --features vosk-stt
+[features]
+default = []
+vosk-stt = ["dep:vosk", "dep:zip"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rusqlite = { version = "0.31", features = ["bundled"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
+futures-util = "0.3"
+urlencoding = "2"
+vosk = { version = "0.3", optional = true }
+zip = { version = "2", optional = true, default-features = false, features = ["deflate"] }

@@ -1,0 +1,28 @@
+# Rust / Tauri
+/target/
+/src-tauri/target/
+**/*.rs.bk
+
+# 前端
+node_modules/
+dist/
+
+# macOS
+.DS_Store
+
+# 数据库与本地数据
+*.db
+*.db-wal
+*.db-shm
+
+# 构建产物
+*.dmg
+*.AppImage
+*.deb
+*.rpm
+*.msi
+*.exe
+*.app
+
+# 图标生成临时目录
+scripts/.icon_tmp/

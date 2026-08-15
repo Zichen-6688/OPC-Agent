@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OPC Agent · 多 AI 员工协同</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- 左侧边栏 -->
+    <aside id="sidebar">
+      <div class="brand">
+        <div class="brand-logo">🤖</div>
+        <div class="brand-text">
+          <div class="brand-name" id="brandName">OPC Agent</div>
+          <div class="brand-edition badge-community" id="editionBadge">社区版</div>
+        </div>
+      </div>
+      <button id="btnNewChat" class="btn-primary btn-block">＋ 新对话</button>
+      <div class="sidebar-label">会话记录</div>
+      <div id="convList" class="conv-list"></div>
+      <div class="sidebar-footer">
+        <button id="btnSettings" class="btn-ghost btn-block">⚙️ 设置</button>
+      </div>
+    </aside>
+
+    <!-- 主聊天区 -->
+    <main id="chat">
+      <header class="chat-header">
+        <div class="chat-title" id="chatTitle">新对话</div>
+        <div class="chat-header-actions">
+          <button id="btnToggleTeam" class="btn-ghost">👥 员工管理</button>
+        </div>
+      </header>
+
+      <div class="chat-scroll" id="chatScroll">
+        <div id="messages" class="messages"></div>
+        <div class="welcome" id="welcome">
+          <div class="welcome-icon">🤖</div>
+          <div class="welcome-title">你好,BOSS 👋</div>
+          <div class="welcome-sub">直接下达指令,我会自动分派给最合适的 AI 员工。</div>
+          <div class="welcome-chips" id="welcomeChips">
+            <button class="chip" data-t="帮我写一段新产品发布会的宣传文案">✍️ 写宣传文案</button>
+            <button class="chip" data-t="帮我规划一下本周的工作安排">📅 规划本周工作</button>
+            <button class="chip" data-t="分析一下我这份数据该怎么解读">📊 数据分析</button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="input-bar">
+        <button id="btnMic" class="mic-btn" title="语音输入">🎤</button>
+        <textarea id="inputText" rows="1" placeholder="给 AI 员工们下达指令…(Enter 发送,Shift+Enter 换行)"></textarea>
+        <button id="btnSend" class="btn-primary send-btn">发送</button>
+      </footer>
+    </main>
+
+    <!-- 右侧员工面板 -->
+    <aside id="team">
+      <div class="team-header">
+        <div class="team-title">AI 员工 <span id="teamCount" class="count-badge">0</span></div>
+        <div class="team-actions">
+          <button id="btnAddEmployee" class="btn-primary btn-sm">＋ 添加</button>
+        </div>
+      </div>
+      <div class="team-tip">员工可自由添加 / 编辑 / 删除,自定义岗位、能力与模型。</div>
+      <div id="employeeList" class="employee-list"></div>
+    </aside>
+  </div>
+
+  <!-- 员工编辑弹窗 -->
+  <div id="modalEmployee" class="modal hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <div class="modal-title" id="empModalTitle">添加 AI 员工</div>
+        <button class="modal-close" data-close="modalEmployee">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <label class="field">
+            <span class="field-label">姓名 <i>*</i></span>
+            <input id="f_name" type="text" placeholder="如:小码">
+          </label>
+          <label class="field">
+            <span class="field-label">岗位 / 角色 <i>*</i></span>
+            <input id="f_role" type="text" placeholder="如:前端工程师">
+          </label>
+          <label class="field">
+            <span class="field-label">头像表情</span>
+            <input id="f_emoji" type="text" maxlength="4" placeholder="如:💻">
+          </label>
+          <label class="field">
+            <span class="field-label">头像颜色</span>
+            <div class="color-swatches" id="f_color"></div>
+          </label>
+          <label class="field field-full">
+            <span class="field-label">擅长领域(逗号分隔)</span>
+            <input id="f_capabilities" type="text" placeholder="如:代码, 网页, 调试">
+          </label>
+          <label class="field field-full">
+            <span class="field-label">系统提示词(员工人设与工作准则)</span>
+            <textarea id="f_system_prompt" rows="4" placeholder="你是公司的资深前端工程师,擅长 React 与界面设计……"></textarea>
+          </label>
+          <label class="field">
+            <span class="field-label">API 地址 <i>*</i></span>
+            <input id="f_base_url" type="text" placeholder="https://api.deepseek.com">
+          </label>
+          <label class="field">
+            <span class="field-label">模型名称 <i>*</i></span>
+            <input id="f_model" type="text" placeholder="deepseek-chat">
+          </label>
+          <label class="field">
+            <span class="field-label">API Key</span>
+            <input id="f_api_key" type="password" placeholder="sk-…">
+          </label>
+          <label class="field">
+            <span class="field-label">温度 <span id="f_temp_val">0.7</span></span>
+            <input id="f_temperature" type="range" min="0" max="2" step="0.1" value="0.7">
+          </label>
+          <label class="field field-full checkbox-field">
+            <input id="f_enabled" type="checkbox" checked>
+            <span>启用该员工(停用后不会被调度)</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" data-close="modalEmployee">取消</button>
+        <button id="btnSaveEmployee" class="btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置弹窗 -->
+  <div id="modalSettings" class="modal hidden">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <div class="modal-title">设置</div>
+        <button class="modal-close" data-close="modalSettings">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-section">
+          <div class="settings-title">🧠 调度中枢(负责把任务分派给合适员工)</div>
+          <div class="form-grid">
+            <label class="field">
+              <span class="field-label">API 地址</span>
+              <input id="s_base_url" type="text">
+            </label>
+            <label class="field">
+              <span class="field-label">API Key</span>
+              <input id="s_api_key" type="password">
+            </label>
+            <label class="field">
+              <span class="field-label">模型</span>
+              <input id="s_model" type="text">
+            </label>
+            <label class="field">
+              <span class="field-label">温度 <span id="s_temp_val">0.3</span></span>
+              <input id="s_temperature" type="range" min="0" max="2" step="0.1" value="0.3">
+            </label>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-title">🔊 语音</div>
+          <label class="field checkbox-field">
+            <input id="s_tts" type="checkbox" checked>
+            <span>员工回复完成后语音播报(TTS)</span>
+          </label>
+          <div class="settings-row">
+            <span class="field-label" id="sttLabel">语音识别</span>
+            <button id="btnTestVoice" class="btn-ghost btn-sm">试听</button>
+          </div>
+          <div id="sttSection" class="stt-section">
+            <div class="stt-info" id="sttInfo">检测中…</div>
+            <div class="stt-download hidden" id="sttDownload">
+              <button id="btnDownloadModel" class="btn-primary btn-sm">下载离线语音模型(约 42MB)</button>
+              <div class="progress hidden" id="sttProgress">
+                <div class="progress-bar" id="sttProgressBar"></div>
+                <span class="progress-text" id="sttProgressText">0%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" data-close="modalSettings">取消</button>
+        <button id="btnSaveSettings" class="btn-primary">保存设置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 确认弹窗 -->
+  <div id="modalConfirm" class="modal hidden">
+    <div class="modal-box modal-sm">
+      <div class="modal-header">
+        <div class="modal-title" id="confirmTitle">确认</div>
+      </div>
+      <div class="modal-body" id="confirmText"></div>
+      <div class="modal-footer">
+        <button class="btn-ghost" data-close="modalConfirm">取消</button>
+        <button id="btnConfirmOk" class="btn-danger">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script>
+
+    // __TAURI__ stub:模拟后端 IPC,仅用于 UI 冒烟测试
+    const MOCK_EMP = {
+      id: 1, name: "小码", role: "程序员", emoji: "👨‍💻", color: "#2563eb",
+      enabled: true, baseUrl: "https://api.deepseek.com", apiKey: "sk-test",
+      model: "deepseek-chat", temperature: 0.3, prompt: "你是一名资深程序员",
+      createdAt: "2026-08-15 10:00:00"
+    };
+    const MOCK_EMP2 = {...MOCK_EMP, id: 2, name: "小艺", role: "设计师", emoji: "🎨", color: "#7c3aed", prompt: "你是一名设计师"};
+    window.__TAURI__ = {
+      core: {
+        invoke: async (name, args) => {
+          console.log("[stub] invoke", name, JSON.stringify(args || {}));
+          switch (name) {
+            case "get_edition": return { edition: "community", version: "0.1.0" };
+            case "get_settings": return { orcBaseUrl: "https://api.deepseek.com", orcApiKey: "", orcModel: "deepseek-chat", orcTemperature: 0.3 };
+            case "list_employees": return [MOCK_EMP, MOCK_EMP2];
+            case "list_conversations": return [];
+            case "get_messages": return [];
+            case "get_dispatch_logs": return [];
+            case "stt_status": return { available: false, modelReady: false, reason: "smoke" };
+            default: throw new Error("stub 未实现: " + name);
+          }
+        }
+      },
+      event: { listen: async () => () => {} }
+    };
+  </script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -14,6 +14,15 @@ jobs:
       release_id: ${{ steps.release.outputs.release_id }}
     steps:
       - uses: actions/checkout@v4
+      - name: 诊断 GitHub token 权限
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "=== repo permissions ==="
+          gh api /repos/${{ github.repository }} --jq '.permissions | to_entries | map(select(.value==true)) | map(.key) | join(",")'
+          echo "=== 尝试创建 release ==="
+          gh release create v0.1.0-diag --title "诊断测试" --notes "诊断" --draft 2>&1 || echo "CREATE_FAILED_EXIT=$?"
+          gh release delete v0.1.0-diag --yes 2>&1 || true
       - name: 创建 Release
         id: release
         uses: tauri-apps/tauri-action@v0
